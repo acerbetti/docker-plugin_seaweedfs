@@ -1,6 +1,6 @@
-PLUGIN_NAME = katharostech/seaweedfs-volume-plugin
-PLUGIN_TAG ?= rootfs
-PRIVATE_REGISTRY ?= localhost:5000
+PLUGIN_NAME = seaweedfs-volume-plugin
+PLUGIN_TAG ?= amd64
+PRIVATE_REGISTRY ?= registry.caplaz.com
 
 all: clean rootfs create
 
@@ -15,10 +15,10 @@ config:
 
 rootfs: config
 	@echo "### docker build: rootfs image with"
-	@docker build -t ${PLUGIN_NAME}:rootfs --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy} .
+	@docker build -t ${PLUGIN_NAME}:${PLUGIN_TAG} --build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy} .
 	@echo "### create rootfs directory in ./plugin/rootfs"
 	@mkdir -p ./plugin/rootfs
-	@docker create --name tmp ${PLUGIN_NAME}:rootfs
+	@docker create --name tmp ${PLUGIN_NAME}:${PLUGIN_TAG}
 	@docker export tmp | tar -x -C ./plugin/rootfs
 	@docker rm -vf tmp
 
@@ -50,6 +50,3 @@ push:  clean rootfs create enable
 push_private: clean rootfs create_private
 	@echo "### push plugin ${PRIVATE_REGISTRY}/${PLUGIN_NAME}:${PLUGIN_TAG}"
 	@docker plugin push ${PRIVATE_REGISTRY}/${PLUGIN_NAME}:${PLUGIN_TAG}
-
-
-
